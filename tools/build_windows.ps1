@@ -61,10 +61,19 @@ try {
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($vsRoot)) {
         throw 'The Visual C++ toolchain was not found.'
     }
-    $crt = Get-ChildItem (Join-Path $vsRoot 'VC/Redist/MSVC/*/x64') -Directory -Filter 'Microsoft.VC*.CRT' |
+    # A wildcard in a parent path combined with -Filter can filter out the
+    # x64 parent itself in PowerShell. Enumerate actual CRT directories instead.
+    $redistRoot = Join-Path $vsRoot 'VC/Redist/MSVC'
+    $crt = Get-ChildItem -LiteralPath $redistRoot -Directory -Recurse -Filter 'Microsoft.VC*.CRT' |
+        Where-Object { $_.Parent.Name -eq 'x64' } |
         Sort-Object FullName -Descending | Select-Object -First 1
     if ($null -eq $crt) { throw 'Visual C++ redistributable DLLs were not found.' }
     Copy-Item (Join-Path $crt.FullName '*.dll') $destination -Force
+    foreach ($runtime in @('msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll')) {
+        if (-not (Test-Path (Join-Path $destination $runtime))) {
+            throw "Required Visual C++ runtime is missing from the portable bundle: $runtime"
+        }
+    }
 
     $zip = "$destination.zip"
     Compress-Archive -Path $destination -DestinationPath $zip -Force
