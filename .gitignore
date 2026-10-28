@@ -1,0 +1,83 @@
+# Publish only application source, icons and build/test configuration.
+# Everything else at the project root stays local by default.
+/*
+!/.gitignore
+!/.metadata
+!/analysis_options.yaml
+!/pubspec.yaml
+!/pubspec.lock
+!/lib/
+!/test/
+!/macos/
+!/windows/
+!/assets/
+!/tools/
+!/.github/
+
+# Keep only the source/build tools needed by the published project.
+/tools/*
+!/tools/build_windows.ps1
+!/tools/generate_icon.swift
+!/tools/check_login.dart
+!/tools/probe_api.py
+
+# Only public brand artwork belongs in assets.
+/assets/*
+!/assets/branding/
+/assets/branding/*
+!/assets/branding/seiue-macos-icon.png
+!/assets/branding/seiue-logo-original.png
+
+# Only Actions source is published from GitHub configuration.
+/.github/*
+!/.github/workflows/
+/.github/workflows/*
+!/.github/workflows/*.yml
+!/.github/workflows/*.yaml
+
+# SDKs, dependencies, generated output and local editor state.
+**/.tools/
+**/.dart_tool/
+**/.pub-cache/
+**/build/
+**/dist/
+**/ephemeral/
+**/Pods/
+**/xcuserdata/
+**/.idea/
+**/.vscode/
+**/__pycache__/
+.flutter-plugins
+.flutter-plugins-dependencies
+coverage/
+*.log
+*.pyc
+*.iml
+.DS_Store
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Local settings, credentials, sessions and personal application caches.
+.env*
+*.pem
+*.key
+*.p12
+*.pfx
+*.mobileprovision
+*.provisionprofile
+**/session.dpapi*
+**/notice-text-v1/
+**/notification-ledger-v1/
+**/notification-preferences-v1.json*
+**/session*.json
+**/credentials*.json
+
+# Explicit exclusions: documents, screenshots, design records and AI skills.
+/README*
+/docs/
+/screenshots/
+/design-system/
+/.agents/
+/.codex/

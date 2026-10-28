@@ -1,0 +1,55 @@
+name: Windows build
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'lib/**'
+      - 'test/**'
+      - 'windows/**'
+      - 'pubspec.*'
+      - 'analysis_options.yaml'
+      - 'tools/build_windows.ps1'
+      - '.github/workflows/windows.yml'
+  pull_request:
+    paths:
+      - 'lib/**'
+      - 'test/**'
+      - 'windows/**'
+      - 'pubspec.*'
+      - 'analysis_options.yaml'
+      - 'tools/build_windows.ps1'
+      - '.github/workflows/windows.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Check out official Flutter 3.47.7 SDK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: flutter/flutter
+          ref: abaf9c523780a608bd46686fd5e53740a07077f8
+          path: .tools/flutter
+          persist-credentials: false
+      - name: Add Flutter to PATH
+        run: Add-Content -Path $env:GITHUB_PATH -Value (Join-Path $env:GITHUB_WORKSPACE '.tools/flutter/bin')
+      - name: Check, build and package
+        run: ./tools/build_windows.ps1
+      - name: Upload portable Windows build
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: Seiue-Windows-x64
+          path: dist/Seiue-Windows-*-x64.zip
+          if-no-files-found: error
+          retention-days: 14
