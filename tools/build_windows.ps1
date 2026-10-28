@@ -25,6 +25,15 @@ try {
         if ($LASTEXITCODE -ne 0) { throw "Flutter command failed: $args" }
     }
 
+    # Bootstrap the tool before parsing its machine-readable version output.
+    Invoke-Flutter --version
+    $sdkOutput = & $flutterExe --version --machine
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot read the Flutter SDK version.' }
+    $sdk = $sdkOutput | ConvertFrom-Json
+    if ($sdk.frameworkVersion -eq '0.0.0-unknown' -or $sdk.frameworkVersion -notmatch '^\d+\.\d+\.\d+') {
+        throw 'Flutter SDK version is unknown. Check out the official release tag, not an untagged shallow commit.'
+    }
+
     Invoke-Flutter pub get --enforce-lockfile
     if (-not $SkipChecks) {
         Invoke-Flutter analyze --no-pub

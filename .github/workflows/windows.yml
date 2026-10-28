@@ -39,9 +39,23 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: flutter/flutter
-          ref: abaf9c523780a608bd46686fd5e53740a07077f8
+          # Flutter derives its SDK version from release tags. A shallow SHA
+          # checkout without the tag reports 0.0.0-unknown to the pub solver.
+          ref: refs/tags/3.47.7
+          fetch-depth: 1
+          fetch-tags: true
           path: .tools/flutter
           persist-credentials: false
+      - name: Verify Flutter release checkout
+        run: |
+          $revision = git -C .tools/flutter rev-parse HEAD
+          if ($LASTEXITCODE -ne 0 -or $revision -ne 'abaf9c523780a608bd46686fd5e53740a07077f8') {
+            throw 'Flutter 3.47.7 resolved to an unexpected commit.'
+          }
+          $tag = git -C .tools/flutter describe --tags --exact-match
+          if ($LASTEXITCODE -ne 0 -or $tag -ne '3.47.7') {
+            throw 'Flutter SDK checkout is missing its 3.47.7 release tag.'
+          }
       - name: Add Flutter to PATH
         run: Add-Content -Path $env:GITHUB_PATH -Value (Join-Path $env:GITHUB_WORKSPACE '.tools/flutter/bin')
       - name: Check, build and package
