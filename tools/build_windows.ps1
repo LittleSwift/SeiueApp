@@ -39,7 +39,8 @@ try {
         Invoke-Flutter analyze --no-pub
         Invoke-Flutter test --no-pub
     }
-    Invoke-Flutter build windows --release --target-platform windows-x64 --no-pub
+    # Flutter selects the Windows target architecture from the host runner.
+    Invoke-Flutter build windows --release --no-pub
 
     $release = Join-Path $projectRoot 'build/windows/x64/runner/Release'
     if (-not (Test-Path (Join-Path $release 'Seiue.exe'))) {
